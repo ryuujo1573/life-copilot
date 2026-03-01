@@ -1,0 +1,18 @@
+/*
+ * https://developers.cloudflare.com/pages/platform/headers/
+ */
+
+/* Asset cache — hashed filenames are immutable */
+/build/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/* HTML — always revalidate */
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/* Security headers */
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=()
