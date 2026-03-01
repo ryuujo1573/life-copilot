@@ -1,0 +1,136 @@
+---
+title: ADHD UX Guidelines — Life Copilot Specification
+description: Design principles, interaction patterns, and acceptance criteria that ensure Life Copilot serves users with ADHD and executive dysfunction.
+---
+
+# ADHD UX Guidelines
+
+These guidelines are **acceptance criteria**, not suggestions. Every UI component, interaction, and notification in Life Copilot must pass the relevant criteria here before it ships. When a design decision is contested, this document is the tiebreaker.
+
+> This spec is informed by ADHD research and lived experience. It will evolve as we gather user feedback.
+
+## Core Principles
+
+### P1 — Capture First, Organize Never (if you don't want to)
+
+The single most important interaction in the app is capturing a thought before it disappears. The app must make this possible in under 2 seconds from any screen with zero categorization required.
+
+**Acceptance criteria:**
+- A global capture input is accessible from every screen via a persistent UI element or keyboard shortcut.
+- The input accepts free text. No fields other than text are required.
+- Pressing Enter (or tapping the button) creates a note in the Inbox and clears the input. No confirmation dialog.
+- The Inbox is always one tap/click away from any screen.
+
+### P2 — No Punishment for Inconsistency
+
+Streak counters, "X days missed" banners, and overdue badges trigger shame and avoidance. ADHD users will abandon an app that makes them feel guilty for being human. Momentum replaces streaks.
+
+**Acceptance criteria:**
+- No UI element shall display a count of consecutive days missed.
+- Routines that were not completed do not display a red "failed" or "missed" state. They reset silently.
+- The only backward-looking metric displayed is **total completions** (e.g., "Completed 42 times"), not failure rate.
+- Overdue tasks are visually distinct (e.g., a muted amber highlight) but not alarming (no red exclamation marks or critical badges).
+
+### P3 — Progressive Disclosure of Complexity
+
+Advanced features — recurrence rules, subtask trees, reminders with complex conditions — must not be visible until explicitly requested. The default view is always the simplest possible view.
+
+**Acceptance criteria:**
+- A newly created task shows only: title, done checkbox, and an expand handle.
+- Details (due date, notes, subtasks, labels, priority) appear behind a single tap/click "expand" action.
+- Settings menus surface the 3 most commonly changed options first; advanced options are collapsed behind a "Show more" disclosure.
+- The app must be fully usable by someone who never opens any settings panel.
+
+### P4 — Reduce Time Blindness
+
+People with ADHD frequently lose track of time, especially during hyperfocus. The app must make time visible and tangible without being intrusive.
+
+**Acceptance criteria:**
+- The Focus Session timer is always visible when a session is active (persistent in the app shell status bar).
+- Time displays use relative language where possible: "in 20 min", "started 45 min ago" — not just timestamps.
+- When a session ends, a gentle notification is shown — not a dismissal that the user must acknowledge to continue working.
+- Time estimates on tasks are optional but, when present, are displayed prominently next to the task title.
+
+### P5 — Actionable Everything
+
+A reminder or notification that requires navigation to act on is a notification that gets dismissed and forgotten. Every notification must allow the primary action to be completed from the notification itself.
+
+**Acceptance criteria:**
+- Reminder notifications include at least one action button (e.g., "Mark done", "Snooze 15 min", "Start focus session").
+- The app must not show any alert that only has a single "Dismiss" or "OK" button.
+- Navigation from a notification lands the user on the relevant item, not the app home screen.
+
+### P6 — Sensory Safety
+
+Flashing, pulsing, or rapidly animating UI causes distraction and can be harmful. Default animations must be functional and brief.
+
+**Acceptance criteria:**
+- All transitions must respect the OS `prefers-reduced-motion` media query.
+- No looping or ambient animations exist in the default theme.
+- Audio notifications must default to off.
+- The app must not use red as the primary color for any status that is not a destructive action (delete, error).
+
+---
+
+## Interaction Patterns
+
+### Brain Dump (Global Capture)
+
+The Brain Dump is the most critical UI element. It is a persistent, always-accessible text input.
+
+| Property | Specification |
+|---|---|
+| Trigger | Keyboard shortcut (configurable, default: `Ctrl+Space` / `Cmd+Space`), or a floating "+" button always visible in the app shell. |
+| Input | Single-line text. Multiline is supported via `Shift+Enter`. |
+| Submission | `Enter` key or tap/click. No separate "Save" button. |
+| Result | Item appears in the Inbox. A brief, non-blocking toast confirms: "Added to Inbox". |
+| Voice input | A microphone icon allows voice-to-text on mobile. |
+| Parsing | The app parses natural language in the background (e.g., "Call dentist tomorrow at 3pm") and suggests extracted metadata. The user can ignore the suggestion. |
+
+### Task Lifecycle
+
+```
+[Inbox] ──(process)──► [Active] ──(complete)──► [Done archive]
+            │                        │
+            └──(defer)──► [Backlog]  └──(undo)──► [Active]
+```
+
+- Items in the **Inbox** are unprocessed Brain Dump captures.
+- **Processing** an Inbox item means assigning it to a list, routine, or session (or deleting it). This is optional — items can live in the Inbox indefinitely.
+- Completing a task moves it to the **Done archive**. It can always be undone.
+- There is no "Archived", "Someday", or "Reference" distinction in V1. These are plugin territory.
+
+### Routine Momentum
+
+Rather than tracking streaks, routines display a **momentum sparkline** — a compact 30-day bar chart where each bar represents one period, and the height of the bar reflects how many items were completed. This gives positive reinforcement for good days without punishing bad ones.
+
+```
+Routine: Morning Wind-Down
+Momentum (last 30 days):
+  ▁▃▅▇█▇▅▃▁▃▅▇█▇▅▇▇▅▅▃▁▃▅▇█▇▅▃▁
+```
+
+### Focus Session States
+
+| State | Visual | User Action |
+|---|---|---|
+| Idle | Timer icon, greyed out | "Start Focus" button |
+| Active | Countdown ring, accent color, in status bar | Pause / End |
+| Paused | Ring paused, amber color | Resume / End |
+| Ended | Soft completion animation | Review / Start new |
+
+---
+
+## Anti-Patterns to Avoid
+
+These patterns are explicitly forbidden in the UI:
+
+| Anti-Pattern | Why | Alternative |
+|---|---|---|
+| Streak counter with reset on miss | Induces shame spiral | Momentum sparkline |
+| "You have 12 overdue tasks" banner | Creates paralysis | Show count only if asked |
+| Required fields on task creation | Raises the capture barrier | Title-only creation |
+| Confirmation dialogs for completion | Adds friction to reward | Instant completion with undo toast |
+| Full-screen modals for simple actions | Interrupts flow state | Inline editing, bottom sheets on mobile |
+| Ambient loading spinners | Visual noise | Optimistic UI updates |
+| Red badge on routine if missed | Implies failure | No badge; silent reset |
