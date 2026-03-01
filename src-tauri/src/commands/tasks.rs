@@ -74,7 +74,8 @@ pub fn task_list(list_id: Option<String>) -> AppResult<Vec<Task>> {
                      WHERE list_id = ?1 AND deleted_at IS NULL
                      ORDER BY sort_order, created_at",
                 )?;
-                let rows = stmt.query_map(rusqlite::params![id], map_task_row)?
+                let rows = stmt
+                    .query_map(rusqlite::params![id], map_task_row)?
                     .collect::<Result<Vec<_>, _>>()?;
                 rows
             }
@@ -86,7 +87,8 @@ pub fn task_list(list_id: Option<String>) -> AppResult<Vec<Task>> {
                      WHERE list_id IS NULL AND deleted_at IS NULL
                      ORDER BY sort_order, created_at",
                 )?;
-                let rows = stmt.query_map([], map_task_row)?
+                let rows = stmt
+                    .query_map([], map_task_row)?
                     .collect::<Result<Vec<_>, _>>()?;
                 rows
             }

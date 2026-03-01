@@ -69,7 +69,10 @@ export function BrainDumpPanel() {
   useEffect(() => {
     const off1 = appBus.subscribe("task:created", () => void loadTasks());
     const off2 = appBus.subscribe("task:completed", () => void loadTasks());
-    return () => { off1(); off2(); };
+    return () => {
+      off1();
+      off2();
+    };
   }, [loadTasks]);
 
   async function toggleDone(task: Task) {
@@ -125,7 +128,9 @@ export function BrainDumpPanel() {
       {!state.loading && state.tasks.length === 0 && (
         <div className="text-center py-16 text-base-content/40">
           <p className="text-4xl mb-3">✨</p>
-          <p className="text-sm">Inbox zero! Type something above to capture a thought.</p>
+          <p className="text-sm">
+            Inbox zero! Type something above to capture a thought.
+          </p>
         </div>
       )}
 
@@ -178,8 +183,10 @@ interface TaskRowProps {
 
 function TaskRow({ task, isDeleting, onToggle, onDelete }: TaskRowProps) {
   return (
-    <li className="flex items-center gap-3 px-4 py-3 rounded-xl bg-base-200
-                   hover:bg-base-300 transition-colors group">
+    <li
+      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-base-200
+                   hover:bg-base-300 transition-colors group"
+    >
       <input
         type="checkbox"
         className="checkbox checkbox-primary checkbox-sm shrink-0"

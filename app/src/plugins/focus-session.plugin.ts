@@ -6,9 +6,7 @@ export const focusSessionPlugin: PluginDefinition = {
   name: "Focus Session",
   version: "1.0.0",
 
-  slots: [
-    { slot: "status-bar", component: FocusTimer, priority: 100 },
-  ],
+  slots: [{ slot: "status-bar", component: FocusTimer, priority: 100 }],
 
   activate(_ctx) {
     // Timer is fully self-contained in the component.

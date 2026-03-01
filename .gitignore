@@ -7,8 +7,8 @@ dist/
 tmp/
 
 # Tauri
-src-tauri/target/
-src-tauri/gen/
+target/
+gen/
 
 # Environment
 .env

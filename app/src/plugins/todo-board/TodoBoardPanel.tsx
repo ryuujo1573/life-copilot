@@ -46,9 +46,12 @@ type Action =
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "loading": return { ...state, loading: true, error: null };
-    case "loaded": return { tasks: action.tasks, loading: false, error: null };
-    case "error": return { ...state, loading: false, error: action.message };
+    case "loading":
+      return { ...state, loading: true, error: null };
+    case "loaded":
+      return { tasks: action.tasks, loading: false, error: null };
+    case "error":
+      return { ...state, loading: false, error: action.message };
     case "toggle":
       return {
         ...state,
@@ -80,7 +83,9 @@ export function TodoBoardPanel() {
     }
   }, []);
 
-  useEffect(() => { void loadTasks(); }, [loadTasks]);
+  useEffect(() => {
+    void loadTasks();
+  }, [loadTasks]);
 
   useEffect(() => {
     const offs = [
@@ -217,7 +222,9 @@ function BoardColumn({
           </div>
         )}
         {!loading && tasks.length === 0 && (
-          <p className="text-xs text-base-content/30 text-center py-6">{emptyMsg}</p>
+          <p className="text-xs text-base-content/30 text-center py-6">
+            {emptyMsg}
+          </p>
         )}
         {!loading &&
           tasks.map((t) => (

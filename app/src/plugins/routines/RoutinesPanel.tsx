@@ -34,9 +34,12 @@ type Action =
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "loading": return { ...state, loading: true, error: null };
-    case "loaded": return { routines: action.routines, loading: false, error: null };
-    case "error": return { ...state, loading: false, error: action.message };
+    case "loading":
+      return { ...state, loading: true, error: null };
+    case "loaded":
+      return { routines: action.routines, loading: false, error: null };
+    case "error":
+      return { ...state, loading: false, error: action.message };
     case "toggle":
       return {
         ...state,
@@ -75,7 +78,9 @@ export function RoutinesPanel() {
     }
   }, []);
 
-  useEffect(() => { void loadRoutines(); }, [loadRoutines]);
+  useEffect(() => {
+    void loadRoutines();
+  }, [loadRoutines]);
 
   // Reload when date changes (midnight crossing — cheap polling)
   useEffect(() => {
@@ -84,7 +89,10 @@ export function RoutinesPanel() {
   }, [loadRoutines]);
 
   useEffect(() => {
-    const off = appBus.subscribe("routine:completed", () => void loadRoutines());
+    const off = appBus.subscribe(
+      "routine:completed",
+      () => void loadRoutines(),
+    );
     return off;
   }, [loadRoutines]);
 
@@ -124,7 +132,9 @@ export function RoutinesPanel() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🔁</span>
-          <h1 className="text-xl font-bold text-base-content">Daily Routines</h1>
+          <h1 className="text-xl font-bold text-base-content">
+            Daily Routines
+          </h1>
           <span className="ml-auto text-sm font-semibold text-base-content/60">
             {doneItems}/{totalItems}
           </span>
@@ -165,8 +175,10 @@ export function RoutinesPanel() {
         return (
           <div key={routine.id} className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-widest
-                               text-base-content/50">
+              <span
+                className="text-xs font-semibold uppercase tracking-widest
+                               text-base-content/50"
+              >
                 {routine.name}
               </span>
               <span className="badge badge-sm badge-ghost ml-auto">
