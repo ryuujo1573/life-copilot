@@ -1,5 +1,5 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
+  "$schema": "../app/node_modules/@tauri-apps/cli/schema.json",
   "productName": "Life Copilot",
   "version": "0.1.0",
   "identifier": "app.lifecopilot",
@@ -7,7 +7,7 @@
     "beforeDevCommand": "bun run dev",
     "beforeBuildCommand": "bun run build",
     "devUrl": "http://localhost:1420",
-    "frontendDist": "../dist"
+    "frontendDist": "../app/dist"
   },
   "app": {
     "withGlobalTauri": false,

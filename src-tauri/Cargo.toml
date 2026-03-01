@@ -30,7 +30,16 @@ log = "0.4"
 chrono = { version = "0.4", features = ["serde"] }
 
 [features]
-# this feature is used for production builds or when `devPath` points to the filesystem
-# DO NOT REMOVE!!
+# `custom-protocol` makes Tauri serve the app from frontendDist instead of devUrl.
+# It is included in `default` so that `cargo run` works out-of-the-box with the
+# pre-built frontend in app/dist/. The Tauri CLI (`tauri dev`) automatically
+# strips this feature when starting in watch/HMR mode, so hot-reload is unaffected.
+default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
 
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
