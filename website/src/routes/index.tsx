@@ -25,11 +25,31 @@ const FEATURES = [
 ];
 
 const SPEC_LINKS = [
-  { label: "System Architecture", href: "/docs/architecture/", desc: "Two-layer Rust/frontend model and IPC contract" },
-  { label: "Plugin API", href: "/docs/plugins/", desc: "Event bus, lifecycle hooks, and TypeScript interfaces" },
-  { label: "ADHD UX Guidelines", href: "/docs/adhd-ux/", desc: "Design principles that double as acceptance criteria" },
-  { label: "Database Schema", href: "/docs/database/", desc: "SQLite entities, conventions, and sync strategy" },
-  { label: "Tauri 2.0 Platform", href: "/docs/tauri/", desc: "Project structure, capabilities, and mobile setup" },
+  {
+    label: "System Architecture",
+    href: "/docs/architecture/",
+    desc: "Two-layer Rust/frontend model and IPC contract",
+  },
+  {
+    label: "Plugin API",
+    href: "/docs/plugins/",
+    desc: "Event bus, lifecycle hooks, and TypeScript interfaces",
+  },
+  {
+    label: "ADHD UX Guidelines",
+    href: "/docs/adhd-ux/",
+    desc: "Design principles that double as acceptance criteria",
+  },
+  {
+    label: "Database Schema",
+    href: "/docs/database/",
+    desc: "SQLite entities, conventions, and sync strategy",
+  },
+  {
+    label: "Tauri 2.0 Platform",
+    href: "/docs/tauri/",
+    desc: "Project structure, capabilities, and mobile setup",
+  },
 ];
 
 export default component$(() => {
@@ -224,4 +244,3 @@ export const head: DocumentHead = {
     },
   ],
 };
-

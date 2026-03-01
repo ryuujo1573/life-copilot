@@ -16,18 +16,18 @@ All data in Life Copilot is stored in a single SQLite database on the user's dev
 
 The database file lives in the platform's app data directory:
 
-| Platform | Path |
-|---|---|
-| Windows | `%APPDATA%\life-copilot\data.db` |
-| macOS | `~/Library/Application Support/life-copilot/data.db` |
-| Linux | `~/.local/share/life-copilot/data.db` |
-| iOS | `{App Documents}/life-copilot/data.db` |
-| Android | `{App Internal Storage}/life-copilot/data.db` |
+| Platform | Path                                                 |
+| -------- | ---------------------------------------------------- |
+| Windows  | `%APPDATA%\life-copilot\data.db`                     |
+| macOS    | `~/Library/Application Support/life-copilot/data.db` |
+| Linux    | `~/.local/share/life-copilot/data.db`                |
+| iOS      | `{App Documents}/life-copilot/data.db`               |
+| Android  | `{App Internal Storage}/life-copilot/data.db`        |
 
 ## Design Principles
 
 1. **Single writer** — Only the Rust core writes to the database. Frontend is read-only via Tauri commands.
-2. **Soft deletes** — No row is ever hard-deleted. A `deleted_at` timestamp marks deletions.  This enables undo, history, and future sync.
+2. **Soft deletes** — No row is ever hard-deleted. A `deleted_at` timestamp marks deletions. This enables undo, history, and future sync.
 3. **Append-only events** — Completions, session records, and state transitions are stored as immutable events, not as mutations to the entity row.
 4. **UUIDs as primary keys** — Enables future sync without ID collisions across devices.
 5. **Timestamps in ISO 8601 UTC** — All `*_at` columns store UTC strings.

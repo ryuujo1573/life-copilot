@@ -14,9 +14,7 @@ interface NavSection {
 const NAV: NavSection[] = [
   {
     title: "Overview",
-    items: [
-      { label: "Introduction", href: "/docs/" },
-    ],
+    items: [{ label: "Introduction", href: "/docs/" }],
   },
   {
     title: "Specification",
@@ -28,15 +26,11 @@ const NAV: NavSection[] = [
   },
   {
     title: "Extensibility",
-    items: [
-      { label: "Plugin API", href: "/docs/plugins/" },
-    ],
+    items: [{ label: "Plugin API", href: "/docs/plugins/" }],
   },
   {
     title: "Design",
-    items: [
-      { label: "ADHD UX Guidelines", href: "/docs/adhd-ux/" },
-    ],
+    items: [{ label: "ADHD UX Guidelines", href: "/docs/adhd-ux/" }],
   },
 ];
 

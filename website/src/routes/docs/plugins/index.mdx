@@ -28,7 +28,7 @@ import { onTaskCreated, onTaskCompleted } from "./handlers";
 
 const plugin: PluginDefinition = {
   // ── Identity ────────────────────────────────────────────────
-  id: "life-copilot.todos",       // Reverse-domain, globally unique
+  id: "life-copilot.todos", // Reverse-domain, globally unique
   name: "Todos",
   version: "1.0.0",
   author: "Life Copilot Core Team",
@@ -46,18 +46,11 @@ const plugin: PluginDefinition = {
 
   // Declares which Tauri commands this plugin may invoke.
   // Must also appear in src-tauri/capabilities/plugins.json.
-  commands: [
-    "get_tasks",
-    "create_task",
-    "update_task",
-    "delete_task",
-  ],
+  commands: ["get_tasks", "create_task", "update_task", "delete_task"],
 
   // ── UI Slots ─────────────────────────────────────────────────
   // Registers Qwik components into named layout slots.
-  widgets: [
-    { slot: "main-panel", component: TodoWidget, priority: 10 },
-  ],
+  widgets: [{ slot: "main-panel", component: TodoWidget, priority: 10 }],
 
   // ── Lifecycle ────────────────────────────────────────────────
   onLoad: async (ctx) => {
@@ -123,11 +116,11 @@ export interface WidgetRegistration {
 }
 
 export type SlotName =
-  | "main-panel"      // The primary content area
-  | "sidebar-top"     // Above the sidebar nav
-  | "sidebar-bottom"  // Below the sidebar nav
-  | "capture-bar"     // The global Brain Dump capture bar
-  | "status-bar";     // Bottom status strip
+  | "main-panel" // The primary content area
+  | "sidebar-top" // Above the sidebar nav
+  | "sidebar-bottom" // Below the sidebar nav
+  | "capture-bar" // The global Brain Dump capture bar
+  | "status-bar"; // Bottom status strip
 
 export interface PluginDefinition {
   id: string;
@@ -155,19 +148,19 @@ The Event Bus is a process-local pub/sub bus. It has two sources of events:
 
 Core events that all plugins may subscribe to without special permission.
 
-| Event | Payload | Emitted by |
-|---|---|---|
-| `session:plugin-ready` | `{ pluginId: string }` | Plugin runtime |
-| `task:created` | `Task` | Todos plugin |
-| `task:updated` | `Task` | Todos plugin |
-| `task:completed` | `{ id: string, completedAt: string }` | Todos plugin |
-| `task:deleted` | `{ id: string }` | Todos plugin |
-| `routine:reset` | `{ routineId: string, date: string }` | Routines plugin |
-| `routine:item-checked` | `{ routineId: string, itemId: string }` | Routines plugin |
-| `session:started` | `FocusSession` | Focus plugin |
-| `session:ended` | `{ sessionId: string, durationMs: number }` | Focus plugin |
-| `reminder:due` | `Reminder` | Rust core |
-| `capture:submitted` | `{ text: string, source: string }` | Brain Dump |
+| Event                  | Payload                                     | Emitted by      |
+| ---------------------- | ------------------------------------------- | --------------- |
+| `session:plugin-ready` | `{ pluginId: string }`                      | Plugin runtime  |
+| `task:created`         | `Task`                                      | Todos plugin    |
+| `task:updated`         | `Task`                                      | Todos plugin    |
+| `task:completed`       | `{ id: string, completedAt: string }`       | Todos plugin    |
+| `task:deleted`         | `{ id: string }`                            | Todos plugin    |
+| `routine:reset`        | `{ routineId: string, date: string }`       | Routines plugin |
+| `routine:item-checked` | `{ routineId: string, itemId: string }`     | Routines plugin |
+| `session:started`      | `FocusSession`                              | Focus plugin    |
+| `session:ended`        | `{ sessionId: string, durationMs: number }` | Focus plugin    |
+| `reminder:due`         | `Reminder`                                  | Rust core       |
+| `capture:submitted`    | `{ text: string, source: string }`          | Brain Dump      |
 
 ### Naming Convention
 

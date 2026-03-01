@@ -111,16 +111,16 @@ Key fields that must be set for Life Copilot:
 
 Tauri commands use `snake_case`. They map to TypeScript wrapper functions in `app/src/bindings/`.
 
-| Rust command | TypeScript wrapper | Description |
-|---|---|---|
-| `get_tasks` | `getTasks(filter)` | List tasks with optional filter |
-| `create_task` | `createTask(payload)` | Create a new task |
-| `update_task` | `updateTask(id, patch)` | Patch a task's fields |
-| `delete_task` | `deleteTask(id)` | Soft-delete a task |
-| `get_routines` | `getRoutines()` | List all routines |
-| `complete_routine_item` | `completeRoutineItem(...)` | Mark a routine item done for today |
-| `start_focus_session` | `startFocusSession(payload)` | Begin a timed focus session |
-| `end_focus_session` | `endFocusSession(id, status)` | End or abandon a session |
+| Rust command            | TypeScript wrapper            | Description                        |
+| ----------------------- | ----------------------------- | ---------------------------------- |
+| `get_tasks`             | `getTasks(filter)`            | List tasks with optional filter    |
+| `create_task`           | `createTask(payload)`         | Create a new task                  |
+| `update_task`           | `updateTask(id, patch)`       | Patch a task's fields              |
+| `delete_task`           | `deleteTask(id)`              | Soft-delete a task                 |
+| `get_routines`          | `getRoutines()`               | List all routines                  |
+| `complete_routine_item` | `completeRoutineItem(...)`    | Mark a routine item done for today |
+| `start_focus_session`   | `startFocusSession(payload)`  | Begin a timed focus session        |
+| `end_focus_session`     | `endFocusSession(id, status)` | End or abandon a session           |
 
 ### Type Generation with `ts-rs`
 
@@ -188,15 +188,15 @@ Plugin sandboxing — commands that plugins may call — are listed in a separat
 
 ## Desktop vs. Mobile Differences
 
-| Concern | Desktop | Mobile |
-|---|---|---|
-| **Entry point** | `main.rs` → `lib::run()` | `#[tauri::mobile_entry_point]` in `lib.rs` |
-| **Window management** | Full window controls | Single full-screen WebView |
-| **Notifications** | OS native (via `tauri-plugin-notification`) | iOS/Android system notifications |
-| **Background tasks** | OS background service or system tray | Platform background fetch limits apply |
-| **File system access** | Full user filesystem | Sandboxed app documents directory |
-| **Deep links** | Custom URL scheme | Universal Links (iOS) / App Links (Android) |
-| **Keyboard** | Hardware keyboard always present | Software keyboard; layout must adapt |
+| Concern                | Desktop                                     | Mobile                                      |
+| ---------------------- | ------------------------------------------- | ------------------------------------------- |
+| **Entry point**        | `main.rs` → `lib::run()`                    | `#[tauri::mobile_entry_point]` in `lib.rs`  |
+| **Window management**  | Full window controls                        | Single full-screen WebView                  |
+| **Notifications**      | OS native (via `tauri-plugin-notification`) | iOS/Android system notifications            |
+| **Background tasks**   | OS background service or system tray        | Platform background fetch limits apply      |
+| **File system access** | Full user filesystem                        | Sandboxed app documents directory           |
+| **Deep links**         | Custom URL scheme                           | Universal Links (iOS) / App Links (Android) |
+| **Keyboard**           | Hardware keyboard always present            | Software keyboard; layout must adapt        |
 
 ### Mobile-Specific Setup
 
@@ -214,12 +214,12 @@ The generated files under `src-tauri/gen/android/` and `src-tauri/gen/apple/` ar
 
 ### Development Workflow
 
-| Task | Command |
-|---|---|
-| Run on desktop | `tauri dev` (from repo root) |
-| Run on Android emulator | `tauri android dev` |
-| Run on iOS simulator | `tauri ios dev` |
-| Build for all desktop targets | `tauri build` |
-| Build Android APK/AAB | `tauri android build` |
-| Build iOS IPA | `tauri ios build` |
-| Regenerate TS bindings | `cargo test export_bindings` (from `src-tauri/`) |
+| Task                          | Command                                          |
+| ----------------------------- | ------------------------------------------------ |
+| Run on desktop                | `tauri dev` (from repo root)                     |
+| Run on Android emulator       | `tauri android dev`                              |
+| Run on iOS simulator          | `tauri ios dev`                                  |
+| Build for all desktop targets | `tauri build`                                    |
+| Build Android APK/AAB         | `tauri android build`                            |
+| Build iOS IPA                 | `tauri ios build`                                |
+| Regenerate TS bindings        | `cargo test export_bindings` (from `src-tauri/`) |

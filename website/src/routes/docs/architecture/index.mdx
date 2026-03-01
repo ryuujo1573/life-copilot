@@ -118,19 +118,19 @@ The plugin system lets first- and third-party code extend Life Copilot's behavio
 
 ### Plugin Boundaries
 
-| Layer | What plugins can do |
-|---|---|
-| **Frontend JS** | Subscribe to and emit events on the JS Event Bus, register UI widgets in predefined slots, call whitelisted Tauri commands. |
+| Layer             | What plugins can do                                                                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend JS**   | Subscribe to and emit events on the JS Event Bus, register UI widgets in predefined slots, call whitelisted Tauri commands.                                     |
 | **Rust (future)** | First-party plugins may register additional Tauri commands via Tauri's native plugin system. Third-party Rust plugins are out of scope until the API is stable. |
 
 See the [Plugin API Specification](/docs/plugins/) for the full contract.
 
 ## Technology Decisions
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| App runtime | Tauri 2.0 | Native performance, small bundle, mobile support, Rust safety. |
-| Frontend framework | Qwik | Resumability removes hydration cost in a WebView context. |
-| Database | SQLite via rusqlite | Embedded, zero-config, battle-tested, excellent mobile support. |
-| IPC type safety | ts-rs code generation | Single source of truth for shared types across Rust and TypeScript. |
-| Frontend state | Qwik signals + Context | Co-located with components; no separate state store needed for V1. |
+| Decision           | Choice                 | Rationale                                                           |
+| ------------------ | ---------------------- | ------------------------------------------------------------------- |
+| App runtime        | Tauri 2.0              | Native performance, small bundle, mobile support, Rust safety.      |
+| Frontend framework | Qwik                   | Resumability removes hydration cost in a WebView context.           |
+| Database           | SQLite via rusqlite    | Embedded, zero-config, battle-tested, excellent mobile support.     |
+| IPC type safety    | ts-rs code generation  | Single source of truth for shared types across Rust and TypeScript. |
+| Frontend state     | Qwik signals + Context | Co-located with components; no separate state store needed for V1.  |

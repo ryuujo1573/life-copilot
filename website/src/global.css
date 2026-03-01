@@ -48,7 +48,9 @@
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────────── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -70,25 +72,46 @@ body {
 }
 
 /* ─── Typography ─────────────────────────────────────────────────── */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   line-height: 1.25;
   color: var(--color-text);
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
 
-h1 { font-size: var(--text-4xl); }
-h2 { font-size: var(--text-3xl); margin-top: var(--space-12); }
-h3 { font-size: var(--text-2xl); margin-top: var(--space-8); }
-h4 { font-size: var(--text-xl);  margin-top: var(--space-6); }
+h1 {
+  font-size: var(--text-4xl);
+}
+h2 {
+  font-size: var(--text-3xl);
+  margin-top: var(--space-12);
+}
+h3 {
+  font-size: var(--text-2xl);
+  margin-top: var(--space-8);
+}
+h4 {
+  font-size: var(--text-xl);
+  margin-top: var(--space-6);
+}
 
-p { margin-top: var(--space-4); }
+p {
+  margin-top: var(--space-4);
+}
 
 a {
   color: var(--color-primary);
   text-decoration: none;
 }
-a:hover { color: var(--color-primary-hover); text-decoration: underline; }
+a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
 
 code {
   font-family: var(--font-mono);
@@ -124,8 +147,14 @@ blockquote {
   color: var(--color-text-muted);
 }
 
-ul, ol { padding-left: var(--space-6); margin-top: var(--space-4); }
-li { margin-top: var(--space-2); }
+ul,
+ol {
+  padding-left: var(--space-6);
+  margin-top: var(--space-4);
+}
+li {
+  margin-top: var(--space-2);
+}
 
 hr {
   border: none;
@@ -139,7 +168,8 @@ table {
   margin-top: var(--space-6);
   font-size: var(--text-sm);
 }
-th, td {
+th,
+td {
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
   text-align: left;
@@ -152,12 +182,15 @@ th {
   font-size: var(--text-xs);
   letter-spacing: 0.05em;
 }
-tr:nth-child(even) td { background: var(--color-bg-raised); }
+tr:nth-child(even) td {
+  background: var(--color-bg-raised);
+}
 
 /* ─── Utilities ──────────────────────────────────────────────────── */
 .visually-hidden {
   position: absolute;
-  width: 1px; height: 1px;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
