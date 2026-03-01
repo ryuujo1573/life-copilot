@@ -27,6 +27,14 @@ pub fn run() {
             commands::plugin_storage::plugin_storage_get,
             commands::plugin_storage::plugin_storage_set,
             commands::plugin_storage::plugin_storage_delete,
+            commands::tasks::task_create,
+            commands::tasks::task_list,
+            commands::tasks::task_complete,
+            commands::tasks::task_delete,
+            commands::routines::routine_list,
+            commands::routines::routine_complete,
+            commands::routines::routine_uncomplete,
+            commands::focus_session::focus_session_save,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

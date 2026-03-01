@@ -18,9 +18,20 @@
  *   └───────────────────────────────────┘
  */
 
+import { useRef } from "react";
 import { SlotOutlet } from "../lib/slot-registry";
+import { appBus } from "../lib/event-bus";
 
 export function AppShell() {
+  const captureRef = useRef<HTMLInputElement>(null);
+
+  function handleCaptureKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter") return;
+    const text = e.currentTarget.value.trim();
+    if (!text) return;
+    appBus.emit("capture:submit", { text });
+    e.currentTarget.value = "";
+  }
   return (
     <div className="flex flex-col h-full bg-base-100 overflow-hidden">
       {/* ── Header ──────────────────────────────────────────────── */}
@@ -79,9 +90,11 @@ export function AppShell() {
       {/* ── Capture Bar ─────────────────────────────────────────── */}
       <div className="flex items-center gap-2 h-[52px] px-4 bg-base-200 border-t border-neutral shrink-0">
         <input
+          ref={captureRef}
           type="text"
           placeholder="Brain Dump — type anything and press Enter…"
           className="input input-bordered flex-1 rounded-full bg-base-100 text-sm placeholder:text-base-content/40 select-text"
+          onKeyDown={handleCaptureKey}
         />
         {/* Plugins can append actions next to the input */}
         <SlotOutlet name="capture-bar" className="flex items-center gap-2" />
