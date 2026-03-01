@@ -1,0 +1,211 @@
+---
+title: Plugin API — Life Copilot Specification
+description: Plugin manifest, lifecycle hooks, the JS Event Bus contract, and UI slot registration.
+---
+
+# Plugin API
+
+The plugin system is the extensibility backbone of Life Copilot. Every bundled feature — Todos, Routines, Focus Sessions, Reminders — is implemented as a first-party plugin. Third-party plugins use the identical API surface, guaranteeing that extensions are first-class citizens.
+
+> **Status:** Draft. This API is not yet implemented. Design feedback welcome via GitHub Issues.
+
+## Core Principles
+
+1. **Plugins are isolated.** A plugin cannot import from another plugin's module. Cross-plugin communication happens exclusively through the Event Bus.
+2. **Plugins declare their dependencies.** A plugin's manifest lists the events it needs to subscribe to and the Tauri commands it needs to call. The runtime rejects plugins that attempt to exceed their declared scope.
+3. **The core ships minimal features.** Anything that can be a plugin, is. This forces the plugin API to remain genuinely capable.
+
+## Plugin Manifest
+
+Every plugin exports a default object conforming to `PluginDefinition`. This is the single entry point the plugin runtime reads.
+
+```typescript
+// packages/plugin-todos/src/index.ts
+
+import type { PluginDefinition } from "@life-copilot/core";
+import { TodoWidget } from "./components/TodoWidget";
+import { onTaskCreated, onTaskCompleted } from "./handlers";
+
+const plugin: PluginDefinition = {
+  // ── Identity ────────────────────────────────────────────────
+  id: "life-copilot.todos",       // Reverse-domain, globally unique
+  name: "Todos",
+  version: "1.0.0",
+  author: "Life Copilot Core Team",
+  description: "Flexible task lists with AI-assisted breakdown.",
+
+  // ── Capabilities ────────────────────────────────────────────
+  // Declares which events this plugin subscribes to. The runtime
+  // will refuse to load the plugin if unlisted events are subscribed.
+  subscribes: [
+    "task:created",
+    "task:completed",
+    "task:deleted",
+    "session:plugin-ready",
+  ],
+
+  // Declares which Tauri commands this plugin may invoke.
+  // Must also appear in src-tauri/capabilities/plugins.json.
+  commands: [
+    "get_tasks",
+    "create_task",
+    "update_task",
+    "delete_task",
+  ],
+
+  // ── UI Slots ─────────────────────────────────────────────────
+  // Registers Qwik components into named layout slots.
+  widgets: [
+    { slot: "main-panel", component: TodoWidget, priority: 10 },
+  ],
+
+  // ── Lifecycle ────────────────────────────────────────────────
+  onLoad: async (ctx) => {
+    // Called once when the plugin is first registered.
+    // Use this to set up internal state, load settings, or
+    // run one-time migrations.
+    await ctx.storage.init("todos-v1");
+  },
+
+  onActivate: (ctx) => {
+    // Called every time the app session starts (after onLoad).
+    // Subscribe to events here — the runtime automatically
+    // unsubscribes them when the plugin is deactivated.
+    ctx.events.on("task:created", onTaskCreated);
+    ctx.events.on("task:completed", onTaskCompleted);
+  },
+
+  onDeactivate: () => {
+    // Called when the user disables the plugin or the app closes.
+    // Clean up timers, observers, or external connections.
+  },
+};
+
+export default plugin;
+```
+
+## TypeScript Interface Reference
+
+```typescript
+// packages/core/src/plugin.ts
+
+export interface PluginContext {
+  /** Scoped pub/sub access — only events listed in `subscribes` are accessible */
+  events: PluginEventBus;
+  /** Namespaced key-value storage backed by SQLite */
+  storage: PluginStorage;
+  /** Call whitelisted Tauri IPC commands */
+  invoke: <T>(command: string, args?: Record<string, unknown>) => Promise<T>;
+}
+
+export interface PluginEventBus {
+  on<T>(event: string, handler: (payload: T) => void): void;
+  emit<T>(event: string, payload: T): void;
+}
+
+export interface PluginStorage {
+  init(namespace: string): Promise<void>;
+  get<T>(key: string): Promise<T | null>;
+  set<T>(key: string, value: T): Promise<void>;
+  delete(key: string): Promise<void>;
+}
+
+export interface WidgetRegistration {
+  /** Named slot in the app shell where this widget will render */
+  slot: SlotName;
+  /** A Qwik component$ */
+  component: Component<{}>;
+  /**
+   * Render priority within the slot — lower numbers render first.
+   * Default: 50.
+   */
+  priority?: number;
+}
+
+export type SlotName =
+  | "main-panel"      // The primary content area
+  | "sidebar-top"     // Above the sidebar nav
+  | "sidebar-bottom"  // Below the sidebar nav
+  | "capture-bar"     // The global Brain Dump capture bar
+  | "status-bar";     // Bottom status strip
+
+export interface PluginDefinition {
+  id: string;
+  name: string;
+  version: string;
+  author: string;
+  description: string;
+  subscribes: string[];
+  commands: string[];
+  widgets?: WidgetRegistration[];
+  onLoad?: (ctx: PluginContext) => Promise<void>;
+  onActivate?: (ctx: PluginContext) => void;
+  onDeactivate?: () => void;
+}
+```
+
+## Event Bus
+
+The Event Bus is a process-local pub/sub bus. It has two sources of events:
+
+1. **Frontend events** — emitted by plugins or the app shell (e.g., `task:created`).
+2. **Tauri backend events** — pushed from Rust via `app_handle.emit(...)` (e.g., `reminder:due`).
+
+### Reserved Event Catalog
+
+Core events that all plugins may subscribe to without special permission.
+
+| Event | Payload | Emitted by |
+|---|---|---|
+| `session:plugin-ready` | `{ pluginId: string }` | Plugin runtime |
+| `task:created` | `Task` | Todos plugin |
+| `task:updated` | `Task` | Todos plugin |
+| `task:completed` | `{ id: string, completedAt: string }` | Todos plugin |
+| `task:deleted` | `{ id: string }` | Todos plugin |
+| `routine:reset` | `{ routineId: string, date: string }` | Routines plugin |
+| `routine:item-checked` | `{ routineId: string, itemId: string }` | Routines plugin |
+| `session:started` | `FocusSession` | Focus plugin |
+| `session:ended` | `{ sessionId: string, durationMs: number }` | Focus plugin |
+| `reminder:due` | `Reminder` | Rust core |
+| `capture:submitted` | `{ text: string, source: string }` | Brain Dump |
+
+### Naming Convention
+
+Events follow the `domain:action` pattern. Domain names are the plugin's feature area in kebab-case. Actions are past-tense verbs.
+
+- ✅ `habit-tracker:streak-updated`
+- ❌ `HabitTracker_UpdateStreak`
+- ❌ `update-habit-streak`
+
+## Plugin Loading Order
+
+1. The app shell reads the plugin registry from `plugins.json` (bundled) or from user-installed plugin manifests.
+2. Each `PluginDefinition` is validated against its declared `subscribes` and `commands`.
+3. `onLoad` is called sequentially (in dependency order, if declared).
+4. After all plugins are loaded, `onActivate` is called for each.
+5. `session:plugin-ready` is emitted for each plugin as its `onActivate` completes.
+
+## Writing Your First Plugin
+
+A minimal plugin that logs every completed task to the console:
+
+```typescript
+import type { PluginDefinition } from "@life-copilot/core";
+
+const plugin: PluginDefinition = {
+  id: "example.task-logger",
+  name: "Task Logger",
+  version: "1.0.0",
+  author: "You",
+  description: "Logs completed tasks to the console.",
+  subscribes: ["task:completed"],
+  commands: [],
+  onActivate: (ctx) => {
+    ctx.events.on("task:completed", (task) => {
+      console.log("[task-logger] Completed:", task);
+    });
+  },
+};
+
+export default plugin;
+```
