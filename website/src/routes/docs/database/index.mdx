@@ -1,0 +1,226 @@
+---
+title: Local-First Database — Life Copilot Specification
+description: SQLite schema via rusqlite, core entity definitions, soft-delete strategy, and optional sync approach.
+---
+
+# Local-First Database
+
+All data in Life Copilot is stored in a single SQLite database on the user's device. There is no remote database. This decision prioritizes privacy, offline reliability, and simplicity over real-time collaboration.
+
+## Why SQLite?
+
+- **Embedded** — no server process, no network, no configuration.
+- **Fast** — reads are effectively memory-mapped; writes are atomic via WAL mode.
+- **Portable** — the same Rust code (`rusqlite`) runs on Windows, macOS, Linux, iOS, and Android.
+- **Inspectable** — users can open the database with any SQLite browser if they want to export or migrate their data.
+
+The database file lives in the platform's app data directory:
+
+| Platform | Path |
+|---|---|
+| Windows | `%APPDATA%\life-copilot\data.db` |
+| macOS | `~/Library/Application Support/life-copilot/data.db` |
+| Linux | `~/.local/share/life-copilot/data.db` |
+| iOS | `{App Documents}/life-copilot/data.db` |
+| Android | `{App Internal Storage}/life-copilot/data.db` |
+
+## Design Principles
+
+1. **Single writer** — Only the Rust core writes to the database. Frontend is read-only via Tauri commands.
+2. **Soft deletes** — No row is ever hard-deleted. A `deleted_at` timestamp marks deletions.  This enables undo, history, and future sync.
+3. **Append-only events** — Completions, session records, and state transitions are stored as immutable events, not as mutations to the entity row.
+4. **UUIDs as primary keys** — Enables future sync without ID collisions across devices.
+5. **Timestamps in ISO 8601 UTC** — All `*_at` columns store UTC strings.
+
+## Schema
+
+### Migrations
+
+Migrations are embedded in the binary using `include_str!` macros and applied at startup via a simple sequential runner. Each migration is a `.sql` file numbered `0001_init.sql`, `0002_*.sql`, etc.
+
+```rust
+// src-tauri/src/db/migrations.rs
+const MIGRATIONS: &[&str] = &[
+    include_str!("migrations/0001_init.sql"),
+    include_str!("migrations/0002_routines.sql"),
+];
+```
+
+---
+
+### Core Tables
+
+#### `tasks`
+
+Stores all task items — both Inbox captures and processed tasks.
+
+```sql
+CREATE TABLE tasks (
+    id          TEXT PRIMARY KEY,        -- UUID v7
+    title       TEXT NOT NULL,
+    notes       TEXT,
+    status      TEXT NOT NULL DEFAULT 'inbox'
+                    CHECK (status IN ('inbox','active','done','backlog')),
+    list_id     TEXT REFERENCES lists(id) ON DELETE SET NULL,
+    due_at      TEXT,                    -- ISO 8601 UTC or NULL
+    estimate_ms INTEGER,                 -- time estimate in milliseconds
+    parent_id   TEXT REFERENCES tasks(id) ON DELETE CASCADE,
+    sort_order  REAL NOT NULL DEFAULT 0,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    completed_at TEXT,
+    deleted_at  TEXT
+);
+
+CREATE INDEX idx_tasks_status    ON tasks(status)   WHERE deleted_at IS NULL;
+CREATE INDEX idx_tasks_list_id   ON tasks(list_id)  WHERE deleted_at IS NULL;
+CREATE INDEX idx_tasks_due_at    ON tasks(due_at)   WHERE deleted_at IS NULL;
+```
+
+#### `lists`
+
+Named collections of tasks.
+
+```sql
+CREATE TABLE lists (
+    id         TEXT PRIMARY KEY,
+    name       TEXT NOT NULL,
+    icon       TEXT,
+    color      TEXT,
+    sort_order REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT
+);
+```
+
+#### `routines`
+
+Recurring checklists. Each routine has a recurrence rule and a set of items.
+
+```sql
+CREATE TABLE routines (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    description TEXT,
+    -- iCal RRULE string, e.g. "FREQ=DAILY" or "FREQ=WEEKLY;BYDAY=MO,WE,FR"
+    rrule       TEXT NOT NULL,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    deleted_at  TEXT
+);
+
+CREATE TABLE routine_items (
+    id         TEXT PRIMARY KEY,
+    routine_id TEXT NOT NULL REFERENCES routines(id) ON DELETE CASCADE,
+    title      TEXT NOT NULL,
+    sort_order REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    deleted_at TEXT
+);
+
+-- One row per routine per period. Resets are implicit (no row = not started).
+CREATE TABLE routine_completions (
+    id            TEXT PRIMARY KEY,
+    routine_id    TEXT NOT NULL REFERENCES routines(id) ON DELETE CASCADE,
+    item_id       TEXT NOT NULL REFERENCES routine_items(id) ON DELETE CASCADE,
+    period_date   TEXT NOT NULL,  -- The ISO date this completion belongs to, e.g. "2026-03-01"
+    completed_at  TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_routine_completions_unique
+    ON routine_completions(routine_id, item_id, period_date);
+```
+
+#### `focus_sessions`
+
+Records of timed work sessions.
+
+```sql
+CREATE TABLE focus_sessions (
+    id          TEXT PRIMARY KEY,
+    task_id     TEXT REFERENCES tasks(id) ON DELETE SET NULL,
+    duration_ms INTEGER NOT NULL,  -- intended duration
+    elapsed_ms  INTEGER,           -- actual elapsed when ended/paused
+    status      TEXT NOT NULL DEFAULT 'active'
+                    CHECK (status IN ('active','paused','completed','abandoned')),
+    started_at  TEXT NOT NULL,
+    ended_at    TEXT
+);
+```
+
+#### `reminders`
+
+Scheduled or context-triggered notifications.
+
+```sql
+CREATE TABLE reminders (
+    id          TEXT PRIMARY KEY,
+    task_id     TEXT REFERENCES tasks(id) ON DELETE CASCADE,
+    message     TEXT,
+    trigger_at  TEXT,              -- ISO 8601 UTC for time-based triggers
+    -- Future: location_id, app_event, etc. for context triggers
+    fired_at    TEXT,              -- NULL until the reminder has been delivered
+    snoozed_until TEXT,
+    created_at  TEXT NOT NULL,
+    deleted_at  TEXT
+);
+```
+
+#### `plugin_storage`
+
+Namespaced key-value store for plugin data.
+
+```sql
+CREATE TABLE plugin_storage (
+    plugin_id  TEXT NOT NULL,
+    key        TEXT NOT NULL,
+    value      TEXT NOT NULL,      -- JSON
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (plugin_id, key)
+);
+```
+
+---
+
+## Querying Conventions
+
+### Active Records
+
+Always filter soft-deleted rows:
+
+```sql
+-- ✅ Correct
+SELECT * FROM tasks WHERE deleted_at IS NULL AND status = 'active';
+
+-- ❌ Wrong — may include deleted items
+SELECT * FROM tasks WHERE status = 'active';
+```
+
+### Routine "Current Period" Completions
+
+To determine which items are complete for today's routine instance:
+
+```sql
+SELECT ri.id, ri.title,
+       rc.completed_at IS NOT NULL AS is_done
+FROM   routine_items ri
+LEFT JOIN routine_completions rc
+       ON rc.item_id = ri.id
+      AND rc.routine_id = ri.routine_id
+      AND rc.period_date = date('now')
+WHERE  ri.routine_id = ?
+  AND  ri.deleted_at IS NULL
+ORDER  BY ri.sort_order;
+```
+
+---
+
+## Optional Sync Strategy (Future)
+
+Sync is out of scope for M1–M3 but the schema is designed to support it. The intended approach:
+
+1. **CRDTs via `cr-sqlite`** — SQLite extension that adds CRDT semantics to tables, enabling merge-without-conflict across devices.
+2. **Plugin-based** — Sync is implemented as a first-party plugin, not a core feature. Users opt in.
+3. **End-to-end encrypted** — All data is encrypted before leaving the device using a user-controlled key.
+4. **Self-hostable relay** — The sync relay is a simple WebSocket server. No Life Copilot-hosted cloud is required.
