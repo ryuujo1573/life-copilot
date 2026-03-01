@@ -10,6 +10,9 @@ tmp/
 src-tauri/target/
 src-tauri/gen/
 
+# Rust workspace build output (root-level target/)
+target/
+
 # Environment
 .env
 .env.*
