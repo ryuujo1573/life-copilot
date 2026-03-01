@@ -1,0 +1,225 @@
+---
+title: Tauri 2.0 Platform — Life Copilot Specification
+description: Project structure, IPC conventions, capability security model, and mobile-specific considerations for the Tauri 2.0 app.
+---
+
+# Tauri 2.0 Platform
+
+Life Copilot targets five platforms through a single Rust codebase: Windows, macOS, Linux (desktop), and iOS, Android (mobile). This is made possible by Tauri 2.0's cross-platform runtime and unified mobile support.
+
+## Repository Structure
+
+```
+life-copilot/
+├── .gitignore
+├── website/                        # This documentation site (Qwik City)
+│
+├── app/                            # Tauri frontend (Qwik + Vite)
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── index.html
+│   └── src/
+│       ├── main.tsx                # App entry point
+│       ├── root.tsx                # QwikCityProvider shell
+│       ├── global.css
+│       ├── bindings/               # ts-rs generated types (committed)
+│       │   └── *.ts
+│       ├── plugins/                # First-party plugin packages
+│       │   ├── plugin-todos/
+│       │   ├── plugin-routines/
+│       │   ├── plugin-focus/
+│       │   └── plugin-reminders/
+│       ├── components/             # Shared UI components
+│       └── routes/                 # Qwik City routes (app screens)
+│
+└── src-tauri/                      # Tauri Rust core
+    ├── Cargo.toml
+    ├── build.rs
+    ├── tauri.conf.json
+    ├── capabilities/
+    │   ├── default.json            # Core app capabilities
+    │   └── plugins.json            # Plugin-accessible commands
+    ├── icons/
+    ├── src/
+    │   ├── main.rs                 # Desktop entry — calls lib::run()
+    │   ├── lib.rs                  # Shared entry (desktop + mobile)
+    │   ├── commands/               # Tauri IPC command handlers (thin)
+    │   │   ├── mod.rs
+    │   │   ├── tasks.rs
+    │   │   ├── routines.rs
+    │   │   ├── sessions.rs
+    │   │   └── reminders.rs
+    │   ├── services/               # Domain business logic
+    │   │   ├── mod.rs
+    │   │   ├── tasks.rs
+    │   │   └── routines.rs
+    │   ├── db/                     # Database layer
+    │   │   ├── mod.rs
+    │   │   ├── pool.rs
+    │   │   └── migrations/
+    │   │       ├── 0001_init.sql
+    │   │       └── 0002_routines.sql
+    │   └── models/                 # Rust structs with ts-rs bindings
+    │       ├── mod.rs
+    │       ├── task.rs
+    │       └── routine.rs
+    └── gen/                        # Auto-generated — do not edit
+        ├── android/
+        └── apple/
+```
+
+## `tauri.conf.json` Reference
+
+Key fields that must be set for Life Copilot:
+
+```json
+{
+  "productName": "Life Copilot",
+  "identifier": "app.lifecopilot",
+  "version": "0.1.0",
+  "build": {
+    "frontendDist": "../app/dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "cd ../app && npm run dev",
+    "beforeBuildCommand": "cd ../app && npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Life Copilot",
+        "width": 1024,
+        "height": 768,
+        "minWidth": 480,
+        "minHeight": 640
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.icns", "icons/icon.ico", "icons/icon.png"]
+  }
+}
+```
+
+## IPC Conventions
+
+### Command Naming
+
+Tauri commands use `snake_case`. They map to TypeScript wrapper functions in `app/src/bindings/`.
+
+| Rust command | TypeScript wrapper | Description |
+|---|---|---|
+| `get_tasks` | `getTasks(filter)` | List tasks with optional filter |
+| `create_task` | `createTask(payload)` | Create a new task |
+| `update_task` | `updateTask(id, patch)` | Patch a task's fields |
+| `delete_task` | `deleteTask(id)` | Soft-delete a task |
+| `get_routines` | `getRoutines()` | List all routines |
+| `complete_routine_item` | `completeRoutineItem(...)` | Mark a routine item done for today |
+| `start_focus_session` | `startFocusSession(payload)` | Begin a timed focus session |
+| `end_focus_session` | `endFocusSession(id, status)` | End or abandon a session |
+
+### Type Generation with `ts-rs`
+
+Every Rust struct that crosses the IPC boundary must derive `TS`:
+
+```rust
+// src-tauri/src/models/task.rs
+use serde::{Deserialize, Serialize};
+use ts_rs::TS;
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../app/src/bindings/Task.ts")]
+pub struct Task {
+    pub id: String,
+    pub title: String,
+    pub notes: Option<String>,
+    pub status: TaskStatus,
+    pub list_id: Option<String>,
+    pub due_at: Option<String>,
+    pub estimate_ms: Option<i64>,
+    pub created_at: String,
+    pub updated_at: String,
+    pub completed_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../app/src/bindings/TaskStatus.ts")]
+#[serde(rename_all = "lowercase")]
+pub enum TaskStatus {
+    Inbox,
+    Active,
+    Done,
+    Backlog,
+}
+```
+
+Run `cargo test export_bindings` to regenerate TypeScript types. Generated files in `app/src/bindings/` are committed to the repository so the frontend can be built without running `cargo`.
+
+## Capability Security Model
+
+Tauri 2.0 uses a capability-based permission system. A command is only callable from the frontend if it is explicitly listed in a capability file.
+
+```json
+// src-tauri/capabilities/default.json
+{
+  "identifier": "default",
+  "description": "Capabilities available to the main app window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "life-copilot:allow-get-tasks",
+    "life-copilot:allow-create-task",
+    "life-copilot:allow-update-task",
+    "life-copilot:allow-delete-task",
+    "life-copilot:allow-get-routines",
+    "life-copilot:allow-complete-routine-item",
+    "life-copilot:allow-start-focus-session",
+    "life-copilot:allow-end-focus-session"
+  ]
+}
+```
+
+Plugin sandboxing — commands that plugins may call — are listed in a separate `plugins.json` capability file. Plugin code cannot call commands from `default.json` unless they are duplicated in `plugins.json`.
+
+## Desktop vs. Mobile Differences
+
+| Concern | Desktop | Mobile |
+|---|---|---|
+| **Entry point** | `main.rs` → `lib::run()` | `#[tauri::mobile_entry_point]` in `lib.rs` |
+| **Window management** | Full window controls | Single full-screen WebView |
+| **Notifications** | OS native (via `tauri-plugin-notification`) | iOS/Android system notifications |
+| **Background tasks** | OS background service or system tray | Platform background fetch limits apply |
+| **File system access** | Full user filesystem | Sandboxed app documents directory |
+| **Deep links** | Custom URL scheme | Universal Links (iOS) / App Links (Android) |
+| **Keyboard** | Hardware keyboard always present | Software keyboard; layout must adapt |
+
+### Mobile-Specific Setup
+
+Mobile targets are generated once and then committed as part of the Tauri build:
+
+```sh
+# Generate Android project
+tauri android init
+
+# Generate iOS project (macOS only)
+tauri ios init
+```
+
+The generated files under `src-tauri/gen/android/` and `src-tauri/gen/apple/` are native Gradle and Xcode projects that embed the compiled Rust library. They are committed to the repository and updated only when the Tauri version changes.
+
+### Development Workflow
+
+| Task | Command |
+|---|---|
+| Run on desktop | `tauri dev` (from repo root) |
+| Run on Android emulator | `tauri android dev` |
+| Run on iOS simulator | `tauri ios dev` |
+| Build for all desktop targets | `tauri build` |
+| Build Android APK/AAB | `tauri android build` |
+| Build iOS IPA | `tauri ios build` |
+| Regenerate TS bindings | `cargo test export_bindings` (from `src-tauri/`) |
