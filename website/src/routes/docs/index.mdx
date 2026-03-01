@@ -1,0 +1,50 @@
+---
+title: Introduction — Life Copilot Specification
+description: Overview of the Life Copilot project, its goals, and how this documentation is organized.
+---
+
+# Life Copilot
+
+> A local-first, extensible personal-organization app built for people with ADHD and anyone who struggles with habits, routines, and self-management.
+
+Life Copilot is a [Tauri 2.0](https://v2.tauri.app) application targeting desktop (Windows, macOS, Linux) and mobile (iOS, Android). It is not a SaaS product — your data lives on your device and syncs only when you explicitly choose to.
+
+This site is the **living specification** for the project. Before a line of app code is written, the architecture, APIs, and UX principles are designed here and validated through review. This approach ensures that contributors and plugin authors have a stable, well-reasoned contract to build against.
+
+## What Problem Does It Solve?
+
+Executive dysfunction — difficulty initiating tasks, maintaining routines, and tracking time — is a core challenge for people with ADHD. Most productivity apps make this worse by:
+
+- **Punishing inconsistency** (broken streak counters, overdue badges).
+- **Requiring upfront categorization** before you can capture a thought.
+- **Hiding state behind nested menus**, adding cognitive load at exactly the wrong moment.
+- **Being too rigid** — a system that doesn't bend gets abandoned.
+
+Life Copilot is designed around the principle that **the app should adapt to the user, not the other way around**.
+
+## Core Features
+
+| Feature | Description |
+|---|---|
+| **Brain Dump** | Frictionless global capture. Log a thought in under 2 seconds without categorizing it. |
+| **Todo Board** | Flexible task lists with AI-assisted breakdown of large tasks into micro-steps. |
+| **Routines** | Recurring checklists with momentum-based progress (no punishing streaks). |
+| **Focus Sessions** | Visual countdown timers (Pomodoro/custom) with session history. |
+| **Reminders** | Context-aware nudges triggered by time, location, or app state. |
+| **Plugin System** | All core features are plugins; third-party plugins use the same stable API. |
+
+## How This Spec Is Organized
+
+- [**System Architecture**](/docs/architecture/) — The two-layer Rust/frontend model, IPC, and local-first data flow.
+- [**Tauri 2.0 Platform**](/docs/tauri/) — Desktop/mobile targets, project structure, and the capability security model.
+- [**Local-First Database**](/docs/database/) — SQLite schema, core entities, and the optional sync strategy.
+- [**Plugin API**](/docs/plugins/) — The event bus, lifecycle hooks, and the TypeScript/Rust interface contract.
+- [**ADHD UX Guidelines**](/docs/adhd-ux/) — Design principles that serve as acceptance criteria for every UI component.
+
+## Project Status
+
+This project is in **M1 — Foundation**. The specification is being written and reviewed before any Tauri app code is scaffolded. See the [GitHub Project board](https://github.com/ryuujo1573/life-copilot/projects) for current milestone progress.
+
+## Contributing
+
+Contributions start with the specification. If you disagree with a design decision, open an issue referencing the specific section. Code contributions are not accepted until the relevant spec section is marked **stable**.
