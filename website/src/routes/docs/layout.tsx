@@ -14,7 +14,10 @@ interface NavSection {
 const NAV: NavSection[] = [
   {
     title: "Overview",
-    items: [{ label: "Introduction", href: "/docs/" }],
+    items: [
+      { label: "Introduction", href: "/docs/" },
+      { label: "Roadmap", href: "/docs/roadmap/" },
+    ],
   },
   {
     title: "Specification",
