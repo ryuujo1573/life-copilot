@@ -22,7 +22,12 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![commands::greet,])
+        .invoke_handler(tauri::generate_handler![
+            commands::greet,
+            commands::plugin_storage::plugin_storage_get,
+            commands::plugin_storage::plugin_storage_set,
+            commands::plugin_storage::plugin_storage_delete,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
