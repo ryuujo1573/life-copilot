@@ -8,8 +8,8 @@ export default defineConfig(async () => ({
   root: "app",
   resolve: {
     alias: {
-      "@": resolve("app/src"),
-      "@bindings": resolve("app/src/bindings"),
+      "@/*": resolve("app/src"),
+      "@bindings/*": resolve("app/src/bindings"),
     },
   },
   clearScreen: false,
