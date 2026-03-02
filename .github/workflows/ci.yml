@@ -14,7 +14,7 @@ on:
 
 defaults:
   run:
-    working-directory: website
+    working-directory: .
 
 jobs:
   # ── Quality gates ─────────────────────────────────────────────
@@ -28,14 +28,24 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      - name: Cache Bun deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            ${{ github.workspace }}/website/node_modules
+          key: ${{ runner.os }}-bun-website-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-website-
+
+      - name: Install website dependencies
+        run: bun install --frozen-lockfile --filter './website'
 
       - name: Lint
-        run: bun run lint
+        run: bun run --cwd website lint
 
       - name: Type-check
-        run: bun run build.types
+        run: bun run --cwd website build.types
 
   # ── Build ──────────────────────────────────────────────────────
   build:
@@ -49,14 +59,24 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      - name: Cache Bun deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            ${{ github.workspace }}/website/node_modules
+          key: ${{ runner.os }}-bun-website-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-website-
+
+      - name: Install website dependencies
+        run: bun install --frozen-lockfile --filter './website'
 
       - name: Build client
-        run: bun run build.client
+        run: bun run --cwd website build.client
 
       - name: Build server (Cloudflare Pages)
-        run: bun run build.server
+        run: bun run --cwd website build.server
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
