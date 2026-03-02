@@ -9,4 +9,6 @@ import render from "./entry.ssr";
 const onRequest = createQwikCity({ render, qwikCityPlan, manifest });
 
 export { onRequest };
+// Also export as `fetch` for _worker.js advanced mode compatibility
+export { onRequest as fetch };
 export type { PlatformCloudflarePages };
