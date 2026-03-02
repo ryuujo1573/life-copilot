@@ -3,6 +3,8 @@ title: Project Roadmap
 description: Milestone-by-milestone delivery plan for Life Copilot
 ---
 
+import { GitHubIssues } from "../../../components/github/github-issues";
+
 # Project Roadmap
 
 This page tracks the full delivery plan across five milestones.
@@ -26,13 +28,7 @@ truth: **[github.com/users/ryuujo1573/projects/6](https://github.com/users/ryuuj
 
 > _Goal: The repo builds, data persists, and a CI pipeline verifies every push._
 
-| #                                                         | Task                                                          | Status |
-| --------------------------------------------------------- | ------------------------------------------------------------- | ------ |
-| [#1](https://github.com/ryuujo1573/life-copilot/issues/1) | GitHub Actions CI + Cloudflare Pages deploy                   | ✅     |
-| [#6](https://github.com/ryuujo1573/life-copilot/issues/6) | Scaffold Tauri 2.0 app in `app/` directory                    | 🔄     |
-| [#3](https://github.com/ryuujo1573/life-copilot/issues/3) | Set up rusqlite connection pool and WAL mode                  | 🔄     |
-| [#4](https://github.com/ryuujo1573/life-copilot/issues/4) | Implement sequential SQL migrations runner                    | 🔲     |
-| [#5](https://github.com/ryuujo1573/life-copilot/issues/5) | Write `0001_init.sql` — core schema (tasks, lists, reminders) | 🔲     |
+<GitHubIssues ids={[1, 6, 3, 4, 5]} />
 
 ### Acceptance Gate
 
@@ -65,12 +61,7 @@ hot reload works; generated types are committed.
 
 > _Goal: Plugins can register, receive events, read/write isolated storage, and render into slots._
 
-| #                                                           | Task                                                        | Status |
-| ----------------------------------------------------------- | ----------------------------------------------------------- | ------ |
-| [#7](https://github.com/ryuujo1573/life-copilot/issues/7)   | Implement JS Event Bus with typed `emit` / `subscribe`      | 🔲     |
-| [#8](https://github.com/ryuujo1573/life-copilot/issues/8)   | Build `PluginLoader` — load, validate, and activate plugins | 🔲     |
-| [#9](https://github.com/ryuujo1573/life-copilot/issues/9)   | Define `PluginContext` API (events, storage, invoke)        | 🔲     |
-| [#10](https://github.com/ryuujo1573/life-copilot/issues/10) | Register UI widget slots in the app shell                   | 🔲     |
+<GitHubIssues ids={[7, 8, 9, 10]} />
 
 **Slot names:** `main-panel`, `sidebar-top`, `sidebar-bottom`, `capture-bar`, `status-bar`
 
@@ -85,12 +76,7 @@ emits an event, persists a value to `plugin_storage`, and unloads cleanly.
 
 > _Goal: The four core ADHD workflows are live as first-party plugins._
 
-| #                                                           | Task                                        | Status |
-| ----------------------------------------------------------- | ------------------------------------------- | ------ |
-| [#11](https://github.com/ryuujo1573/life-copilot/issues/11) | Brain Dump capture bar (global inbox input) | 🔲     |
-| [#12](https://github.com/ryuujo1573/life-copilot/issues/12) | Todo board plugin (`plugin-todos`)          | 🔲     |
-| [#13](https://github.com/ryuujo1573/life-copilot/issues/13) | Routine tracker plugin (`plugin-routines`)  | 🔲     |
-| [#14](https://github.com/ryuujo1573/life-copilot/issues/14) | Focus Session timer plugin (`plugin-focus`) | 🔲     |
+<GitHubIssues ids={[11, 12, 13, 14]} />
 
 ### Acceptance Gate
 
@@ -104,14 +90,14 @@ routine completion persists across restarts; focus session emits `session:comple
 
 > _Goal: LLM-assisted task breakdown, smart reminders, and production-ready packaging._
 
-| #                                                           | Task                                                         | Status |
-| ----------------------------------------------------------- | ------------------------------------------------------------ | ------ |
-| [#15](https://github.com/ryuujo1573/life-copilot/issues/15) | Integrate LLM for AI-assisted task breakdown                 | 🔲     |
-| [#16](https://github.com/ryuujo1573/life-copilot/issues/16) | Implement context-aware reminder engine                      | 🔲     |
-| —                                                           | Mobile build targets (iOS + Android via Tauri Mobile)        | 🔲     |
-| —                                                           | Auto-update (`tauri-plugin-updater`)                         | 🔲     |
-| —                                                           | Installer signing (macOS notarization, Windows Authenticode) | 🔲     |
-| —                                                           | Accessibility audit and final ADHD UX review                 | 🔲     |
+<GitHubIssues ids={[15, 16]} />
+
+| #   | Task                                                         | Status |
+| --- | ------------------------------------------------------------ | ------ |
+| —   | Mobile build targets (iOS + Android via Tauri Mobile)        | 🔲     |
+| —   | Auto-update (`tauri-plugin-updater`)                         | 🔲     |
+| —   | Installer signing (macOS notarization, Windows Authenticode) | 🔲     |
+| —   | Accessibility audit and final ADHD UX review                 | 🔲     |
 
 ### Acceptance Gate
 

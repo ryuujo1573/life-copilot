@@ -6,7 +6,10 @@ import { defineConfig, type UserConfig } from "vite";
 import { qwikVite } from "@builder.io/qwik/optimizer";
 import { qwikCity } from "@builder.io/qwik-city/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import tailwindcss from "@tailwindcss/vite";
 import pkg from "./package.json";
+import { execSync } from "child_process";
+import path from "path";
 
 type PkgDep = Record<string, string>;
 const { dependencies = {}, devDependencies = {} } = pkg as any as {
@@ -17,11 +20,48 @@ const { dependencies = {}, devDependencies = {} } = pkg as any as {
 errorOnDuplicatesPkgDeps(devDependencies, dependencies);
 
 /**
+ * Custom Vite plugin to inject git last commit timestamp into MDX frontmatter.
+ */
+function gitTimestampPlugin() {
+  return {
+    name: "vite-plugin-git-timestamp",
+    transform(code: string, id: string) {
+      if (id.endsWith(".mdx") && id.includes(path.join("src", "routes"))) {
+        try {
+          const timestamp = execSync(`git log -1 --format=%cI "${id}"`)
+            .toString()
+            .trim();
+          if (timestamp) {
+            // Qwik City MDX handling: Prepend to the code. 
+            // If there's existing frontmatter, we can append to it or just export a constant.
+            // City's MDX loader usually handles frontmatter, but we can inject a variable.
+            return {
+              code: `export const lastUpdated = "${timestamp}";\n${code}`,
+              map: null,
+            };
+          }
+        } catch (e) {
+          // If git command fails (e.g. file not tracked), ignore
+          return null;
+        }
+      }
+      return null;
+    },
+  };
+}
+
+/**
  * Note that Vite normally starts from `index.html` but the qwikCity plugin makes start at `src/entry.ssr.tsx` instead.
  */
 export default defineConfig(({ command, mode }): UserConfig => {
   return {
-    plugins: [qwikCity(), qwikVite(), tsconfigPaths({ root: "." })],
+    plugins: [
+      tailwindcss(),
+      qwikCity(),
+      qwikVite(),
+      tsconfigPaths({ root: "." }),
+      gitTimestampPlugin(),
+    ],
     // This tells Vite which dependencies to pre-build in dev mode.
     optimizeDeps: {
       // Put problematic deps that break bundling here, mostly those with binaries.

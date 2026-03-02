@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@plugin "flyonui";
+
 /* ─── Design Tokens ──────────────────────────────────────────────── */
 :root {
   /* Colors */
@@ -185,6 +188,10 @@ th {
 tr:nth-child(even) td {
   background: var(--color-bg-raised);
 }
+
+/* ─── Docs Article Content Overrides ───────────────────────────── */
+.docs-article > h1:first-child { margin-top: 0; }
+.docs-article > h2:first-of-type { margin-top: 2rem; }
 
 /* ─── Utilities ──────────────────────────────────────────────────── */
 .visually-hidden {
