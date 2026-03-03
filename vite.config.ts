@@ -5,11 +5,11 @@ import { resolve } from "path";
 
 export default defineConfig(async () => ({
   plugins: [react(), tailwindcss()],
-  root: "app",
+  root: "src",
   resolve: {
     alias: {
-      "@/*": resolve("app/src"),
-      "@bindings/*": resolve("app/src/bindings"),
+      "@/*": resolve("src"),
+      "@bindings/*": resolve("src/bindings"),
     },
   },
   clearScreen: false,

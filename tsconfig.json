@@ -27,5 +27,6 @@
       "@bindings/*": ["src/bindings/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "files": ["vite.config.ts"]
 }
