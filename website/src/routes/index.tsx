@@ -54,25 +54,32 @@ const SPEC_LINKS = [
 
 export default component$(() => {
   return (
-    <div class="home">
+    <div class="min-h-dvh">
       {/* Hero */}
-      <header class="home-hero">
-        <div class="home-hero__inner">
-          <p class="home-hero__eyebrow">Specification · v0.1</p>
-          <h1 class="home-hero__title">Life Copilot</h1>
-          <p class="home-hero__subtitle">
+      <header class="flex items-center justify-center min-h-[60dvh] px-6 py-20 text-center bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(124,106,247,0.15),transparent)]">
+        <div class="max-w-xl">
+          <p class="text-sm font-semibold uppercase tracking-widest text-[var(--color-primary)] mb-3">
+            Specification · v0.1
+          </p>
+          <h1 class="text-5xl font-extrabold tracking-tight leading-tight bg-gradient-to-br from-[var(--color-text)] to-[var(--color-primary)] bg-clip-text text-transparent">
+            Life Copilot
+          </h1>
+          <p class="text-lg text-[var(--color-text-muted)] max-w-md mx-auto mt-5 leading-relaxed">
             A local-first, extensible personal-organization app for people with
             ADHD — built on Tauri 2.0 with a stable plugin API.
           </p>
-          <div class="home-hero__actions">
-            <Link href="/docs/" class="btn btn--primary">
+          <div class="flex gap-3 justify-center mt-8 flex-wrap">
+            <Link
+              href="/docs/"
+              class="inline-flex items-center px-6 py-2.5 rounded-lg bg-[var(--color-primary)] text-white font-semibold text-sm hover:bg-[var(--color-primary-hover)] hover:no-underline transition-colors"
+            >
               Read the Spec →
             </Link>
             <a
               href="https://github.com/ryuujo1573/life-copilot"
               target="_blank"
               rel="noreferrer"
-              class="btn btn--ghost"
+              class="inline-flex items-center px-6 py-2.5 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold text-sm hover:border-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:no-underline transition-colors"
             >
               GitHub
             </a>
@@ -81,15 +88,24 @@ export default component$(() => {
       </header>
 
       {/* Features */}
-      <section class="home-section">
-        <div class="home-section__inner">
-          <h2 class="home-section__heading">Built for Executive Dysfunction</h2>
-          <div class="feature-grid">
+      <section class="px-6 py-20">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-2xl font-bold tracking-tight text-[var(--color-text)]">
+            Built for Executive Dysfunction
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
             {FEATURES.map((f) => (
-              <div key={f.title} class="feature-card">
-                <span class="feature-card__icon">{f.icon}</span>
-                <h3 class="feature-card__title">{f.title}</h3>
-                <p class="feature-card__desc">{f.desc}</p>
+              <div
+                key={f.title}
+                class="bg-[var(--color-bg-raised)] border border-[var(--color-border)] rounded-xl p-6"
+              >
+                <span class="text-2xl block mb-3">{f.icon}</span>
+                <h3 class="text-base font-semibold text-[var(--color-text)]">
+                  {f.title}
+                </h3>
+                <p class="text-sm text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
+                  {f.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -97,139 +113,30 @@ export default component$(() => {
       </section>
 
       {/* Spec Links */}
-      <section class="home-section home-section--alt">
-        <div class="home-section__inner">
-          <h2 class="home-section__heading">Specification Sections</h2>
-          <ul class="spec-list">
+      <section class="px-6 py-20 bg-[var(--color-bg-raised)]">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-2xl font-bold tracking-tight text-[var(--color-text)]">
+            Specification Sections
+          </h2>
+          <ul class="flex flex-col gap-3 mt-8 list-none p-0">
             {SPEC_LINKS.map((s) => (
-              <li key={s.href}>
-                <Link href={s.href} class="spec-link">
-                  <span class="spec-link__label">{s.label}</span>
-                  <span class="spec-link__desc">{s.desc}</span>
+              <li key={s.href} class="m-0 p-0">
+                <Link
+                  href={s.href}
+                  class="flex flex-col gap-1 p-5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] hover:no-underline transition-colors"
+                >
+                  <span class="font-semibold text-base text-[var(--color-text)]">
+                    {s.label}
+                  </span>
+                  <span class="text-sm text-[var(--color-text-muted)]">
+                    {s.desc}
+                  </span>
                 </Link>
               </li>
             ))}
           </ul>
         </div>
       </section>
-
-      <style>{`
-        .home { min-height: 100dvh; }
-
-        /* Hero */
-        .home-hero {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 60dvh;
-          padding: var(--space-16) var(--space-6);
-          text-align: center;
-          background: radial-gradient(
-            ellipse 80% 60% at 50% -10%,
-            color-mix(in srgb, var(--color-primary) 18%, transparent),
-            transparent
-          );
-        }
-        .home-hero__inner { max-width: 640px; }
-        .home-hero__eyebrow {
-          font-size: var(--text-sm);
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: var(--color-primary);
-          margin-bottom: var(--space-3);
-        }
-        .home-hero__title {
-          font-size: clamp(2.5rem, 8vw, 4rem);
-          font-weight: 800;
-          letter-spacing: -0.03em;
-          margin: 0;
-          background: linear-gradient(135deg, var(--color-text) 40%, var(--color-primary));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .home-hero__subtitle {
-          font-size: var(--text-lg);
-          color: var(--color-text-muted);
-          max-width: 520px;
-          margin: var(--space-4) auto 0;
-        }
-        .home-hero__actions {
-          display: flex;
-          gap: var(--space-3);
-          justify-content: center;
-          margin-top: var(--space-8);
-          flex-wrap: wrap;
-        }
-
-        /* Buttons */
-        .btn {
-          display: inline-flex;
-          align-items: center;
-          gap: var(--space-2);
-          padding: var(--space-3) var(--space-6);
-          border-radius: var(--radius-md);
-          font-weight: 600;
-          font-size: var(--text-sm);
-          transition: all 0.15s;
-          cursor: pointer;
-        }
-        .btn:hover { text-decoration: none; }
-        .btn--primary {
-          background: var(--color-primary);
-          color: #fff;
-        }
-        .btn--primary:hover { background: var(--color-primary-hover); color: #fff; }
-        .btn--ghost {
-          border: 1px solid var(--color-border);
-          color: var(--color-text-muted);
-          background: transparent;
-        }
-        .btn--ghost:hover { border-color: var(--color-text-muted); color: var(--color-text); }
-
-        /* Sections */
-        .home-section { padding: var(--space-16) var(--space-6); }
-        .home-section--alt { background: var(--color-bg-raised); }
-        .home-section__inner { max-width: 900px; margin: 0 auto; }
-        .home-section__heading {
-          font-size: var(--text-2xl);
-          font-weight: 700;
-          margin: 0 0 var(--space-8);
-        }
-
-        /* Feature grid */
-        .feature-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: var(--space-4);
-        }
-        .feature-card {
-          background: var(--color-bg-raised);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-lg);
-          padding: var(--space-6);
-        }
-        .feature-card__icon { font-size: 1.75rem; display: block; margin-bottom: var(--space-3); }
-        .feature-card__title { font-size: var(--text-base); font-weight: 600; margin: 0; }
-        .feature-card__desc { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-2); }
-
-        /* Spec list */
-        .spec-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
-        .spec-link {
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-1);
-          padding: var(--space-4) var(--space-6);
-          background: var(--color-bg);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-md);
-          transition: border-color 0.15s;
-        }
-        .spec-link:hover { border-color: var(--color-primary); text-decoration: none; }
-        .spec-link__label { font-weight: 600; font-size: var(--text-base); color: var(--color-text); }
-        .spec-link__desc { font-size: var(--text-sm); color: var(--color-text-muted); }
-      `}</style>
     </div>
   );
 });

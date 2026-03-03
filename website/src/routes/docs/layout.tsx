@@ -49,41 +49,44 @@ export default component$(() => {
   }`;
 
   const lastUpdated = head.frontmatter?.lastUpdated;
+  const authors = head.frontmatter?.authors as string[] | undefined;
 
   return (
     <div class="flex flex-col min-h-screen">
       {/* Sticky Header */}
-      <header class="navbar sticky top-0 z-40 min-h-14 h-14 border-b border-base-300 bg-base-100 px-6">
-        <div class="navbar-start gap-4">
-          <Link
-            href="/"
-            class="text-lg font-bold tracking-tight text-base-content hover:text-primary hover:no-underline"
-          >
-            Life Copilot
-          </Link>
-          <span class="badge badge-primary badge-soft badge-sm font-semibold uppercase tracking-wide">
-            Specification
-          </span>
-        </div>
-        <div class="navbar-end gap-3">
-          <GitHubStatus />
-          <a
-            href="https://github.com/ryuujo1573/life-copilot"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
-            aria-label="GitHub Repository"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="currentColor"
-              aria-hidden="true"
+      <header class="navbar sticky px-4 top-0 z-40 h-14 border-b border-base-300 bg-base-100/80 backdrop-blur-xl">
+        <div class="max-w-7xl w-full mx-auto flex items-center justify-between px-6">
+          <div class="flex items-center gap-3">
+            <Link
+              href="/"
+              class="text-base font-bold tracking-tight text-base-content hover:text-primary hover:no-underline"
             >
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-            </svg>
-          </a>
+              Life Copilot
+            </Link>
+            <span class="badge badge-primary badge-soft badge-sm font-semibold uppercase tracking-wide">
+              Specification
+            </span>
+          </div>
+          <div class="flex items-center gap-3">
+            <GitHubStatus />
+            <a
+              href="https://github.com/ryuujo1573/life-copilot"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
+              aria-label="GitHub Repository"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -102,7 +105,7 @@ export default component$(() => {
                     <li key={item.href}>
                       <Link
                         href={item.href}
-                        class={loc.url.pathname === item.href ? "active" : ""}
+                        class={`hover:no-underline${loc.url.pathname === item.href ? " active" : ""}`}
                       >
                         {item.label}
                       </Link>
@@ -115,28 +118,47 @@ export default component$(() => {
         </aside>
 
         {/* Content */}
-        <main class="flex-1 min-w-0 p-8 xl:px-12 max-md:px-4 max-md:py-6">
-          <article class="docs-article max-w-195 pb-16">
+        <main class="flex-1 min-w-0 px-8 py-10 xl:px-16 max-md:px-5 max-md:py-8">
+          {/* Article body — prose handles all typography */}
+          <article class="prose">
             <Slot />
-            <footer class="mt-12 pt-6 border-t border-base-300">
-              <div class="flex justify-between items-center text-sm text-base-content/60">
-                {lastUpdated && (
-                  <span>
-                    Last updated:{" "}
-                    {new Date(lastUpdated).toLocaleDateString()}
-                  </span>
-                )}
+          </article>
+
+          {/* Document footer — metadata at end */}
+          <footer class="mt-16 pt-6 border-t border-base-300">
+            <div class="flex flex-col gap-3">
+              {(lastUpdated || authors) && (
+                <div class="flex flex-col gap-1 text-sm text-base-content/40">
+                  {lastUpdated && (
+                    <p>
+                      Last updated{" "}
+                      {new Date(lastUpdated).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </p>
+                  )}
+                  {authors && authors.length > 0 && (
+                    <p>
+                      {authors.length === 1 ? "Author" : "Authors"}:{" "}
+                      {authors.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+              <div class="flex justify-end items-center text-sm">
                 <a
                   href={editUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="link link-primary font-medium ml-auto"
+                  class="link link-primary font-medium"
                 >
-                  Edit this page
+                  Edit this page on GitHub
                 </a>
               </div>
-            </footer>
-          </article>
+            </div>
+          </footer>
         </main>
       </div>
     </div>

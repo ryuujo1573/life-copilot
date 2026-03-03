@@ -7,6 +7,7 @@ import { qwikVite } from "@builder.io/qwik/optimizer";
 import { qwikCity } from "@builder.io/qwik-city/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
+import rehypePrettyCode from "rehype-pretty-code";
 import pkg from "./package.json";
 import { execSync } from "child_process";
 import path from "path";
@@ -57,7 +58,24 @@ export default defineConfig(({ command, mode }): UserConfig => {
   return {
     plugins: [
       tailwindcss(),
-      qwikCity(),
+      qwikCity({
+        mdxPlugins: {
+          remarkGfm: true,
+          rehypeSyntaxHighlight: false,
+          rehypeAutolinkHeadings: true,
+        },
+        mdx: {
+          rehypePlugins: [
+            [
+              rehypePrettyCode,
+              {
+                theme: "github-dark-dimmed",
+                keepBackground: false,
+              },
+            ],
+          ],
+        },
+      }),
       qwikVite(),
       tsconfigPaths({ root: "." }),
       gitTimestampPlugin(),

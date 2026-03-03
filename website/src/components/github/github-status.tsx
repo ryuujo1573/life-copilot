@@ -21,25 +21,28 @@ export const GitHubStatus = component$(() => {
   });
 
   return (
-    <div class="flex items-center text-xs bg-base-200 border border-base-300 rounded-full px-3 py-1 mr-3 gap-2">
+    <div class="flex items-center text-[11px] bg-base-200/60 border border-white/8 rounded-full px-3 py-1 mr-3 gap-2">
       <Resource
         value={repoResource}
-        onPending={() => <span class="opacity-50 italic">Fetching live stats...</span>}
-        onRejected={() => <span class="opacity-50">Status unavailable</span>}
+        onPending={() => <span class="opacity-40 italic">Loading...</span>}
+        onRejected={() => <span class="opacity-40">Status unavailable</span>}
         onResolved={(repo) => (
           <div class="flex items-center gap-2">
-            <span class="relative flex size-2">
+            <span class="relative flex size-1.5">
               <span class="absolute inline-flex size-full rounded-full bg-success opacity-75 animate-ping"></span>
-              <span class="relative inline-flex size-2 rounded-full bg-success"></span>
+              <span class="relative inline-flex size-1.5 rounded-full bg-success"></span>
             </span>
-            <span class="text-base-content/70">
-              <strong class="text-base-content">{repo.stargazers_count}</strong> stars
+            <span class="text-base-content/60">
+              <strong class="text-base-content font-semibold">{repo.stargazers_count}</strong> stars
             </span>
-            <span class="text-base-content/30">•</span>
-            <span class="text-base-content/70">
+            <span class="text-base-content/20">·</span>
+            <span class="text-base-content/60">
               Updated{" "}
-              <strong class="text-base-content">
-                {new Date(repo.pushed_at).toLocaleDateString()}
+              <strong class="text-base-content font-semibold">
+                {new Date(repo.pushed_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}
               </strong>
             </span>
           </div>
